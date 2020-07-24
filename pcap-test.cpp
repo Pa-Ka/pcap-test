@@ -100,25 +100,29 @@ int main(int argc, char* argv[]) {
 
         ETH *eh;
         eh = (ETH *)packet;
-        count += 14;
-        packet += count;
-        IPH *ih;
-        ih = (IPH *)packet;
-        if(ih->Protocol == 0x06)
+        if(eh->Type == 8)
         {
-            int tmp = 0;
-            printf("┌──────────TCP DATA─────────────\n");
-            PrintEthernetHeader(eh); // ETH Header Print
-            PrintIPHeader(ih); // IP 헤더 출력
-            count += (ih->IHL) * 4; // IP Header count
-            packet += (ih->IHL) * 4; // 아이피 헤더 건너 뛰고, 
-            tmp = PrintTCPHeader(packet); // TCP 헤더 길이 구해놨으니, 그 이후의 페이로드를 보자.
-            packet += tmp; // Packet Pointer move
-            count += tmp; // Count Add
-            PrintHTTPHeader(packet, header->caplen, count, 16); // 패킷 전체 사이즈와 앞의 TCP 헤더까지의 사이즈, 나중에 수정할 수 있도록 16바이트를 지정해서 넘겨준다.
-            printf("| %u bytes captured\n", header->caplen);
-            printf("└─────────────────────────────\n");
-        }   
+            count += 14;
+            packet += count;
+            IPH *ih;
+            ih = (IPH *)packet;
+            if(ih->Protocol == 0x06)
+            {
+                int tmp = 0;
+                printf("┌──────────TCP DATA─────────────\n");
+                PrintEthernetHeader(eh); // ETH Header Print
+                PrintIPHeader(ih); // IP 헤더 출력
+                count += (ih->IHL) * 4; // IP Header count
+                packet += (ih->IHL) * 4; // 아이피 헤더 건너 뛰고, 
+                tmp = PrintTCPHeader(packet); // TCP 헤더 길이 구해놨으니, 그 이후의 페이로드를 보자.
+                packet += tmp; // Packet Pointer move
+                count += tmp; // Count Add
+                PrintHTTPHeader(packet, header->caplen, count, 16); // 패킷 전체 사이즈와 앞의 TCP 헤더까지의 사이즈, 나중에 수정할 수 있도록 16바이트를 지정해서 넘겨준다.
+                printf("| %u bytes captured\n", header->caplen);
+                printf("└─────────────────────────────\n");
+            }   
+        }
+        
     }
 
     pcap_close(handle);
@@ -161,7 +165,7 @@ void PrintHTTPHeader(const u_char *packet, u_int size, u_int count, u_int byte){
     }
     printf("\n");
     packet -= byte;
-    printf("| STR :");
+    printf("| STR : ");
     for(int i = 0; i < byte; i++) {
         printf("%c", *packet++);
     }
